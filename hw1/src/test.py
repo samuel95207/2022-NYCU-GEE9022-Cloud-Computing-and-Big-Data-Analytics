@@ -11,13 +11,13 @@ import torch.nn.functional as F
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        self.conv1 = nn.Conv2d(1, 16, (1, 4), 1)
-        self.conv2 = nn.Conv2d(16, 32, (1, 4), 1)
+        self.conv1 = nn.Conv2d(1, 16, (1, 32), 1)
+        self.conv2 = nn.Conv2d(16, 32, (1, 32), 1)
         self.pool = nn.MaxPool2d((1, 2), 2)
         self.dropout1 = nn.Dropout(0.25)
-        self.fc1 = nn.Linear(1763904, 128)
+        self.fc1 = nn.Linear(1763008, 256)
         self.dropout2 = nn.Dropout(0.5)
-        self.fc2 = nn.Linear(128, 1)
+        self.fc2 = nn.Linear(256, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -34,7 +34,6 @@ class Model(nn.Module):
         x = self.fc2(x)
         output = self.sigmoid(x)
         return output
-
 
 
 def read_files(csv_path, audio_folder_path):
@@ -55,20 +54,19 @@ def read_files(csv_path, audio_folder_path):
 
     return track_df, pd.DataFrame(audio_dict)
 
+
 def preprocess_data(track_df, audio_df):
     x = np.array([[[value]] for value in audio_df["y"].values])
     return x
 
 
-
-
-
 model_folder_path = "../model"
 data_folder_path = "../data"
-load_model_name = "success_model1.pt"
+load_model_name = "success_model6.pt"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+print("Loading Model...")
 model = torch.load(f"{model_folder_path}/{load_model_name}")
 model.eval()
 
@@ -89,9 +87,3 @@ for track, features in zip(test_track_df['track'], test_x):
 
 output_df = pd.DataFrame(output_dict)
 output_df.to_csv(f"{data_folder_path}/submission.csv", index=False)
-
-
-
-
-
-
