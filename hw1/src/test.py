@@ -7,6 +7,8 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
+import argparse
+
 
 class Model(nn.Module):
     def __init__(self):
@@ -54,15 +56,42 @@ def read_files(csv_path, audio_folder_path):
 
     return track_df, pd.DataFrame(audio_dict)
 
+def read_files(filename):
+    track_dict = {
+        "track": filename,
+    }
+    audio_dict = {
+        "track": [],
+        "y": [],
+        "sr": [],
+    }
+
+    track_df = pd.DataFrame(track_dict)
+
+    for track_path in track_df["track"]:
+        print(f"loading {track_path}")
+        y, sr = librosa.load(track_path)
+        audio_dict["track"].append(track_path)
+        audio_dict["y"].append(y)
+        audio_dict["sr"].append(sr)
+
+    return track_df, pd.DataFrame(audio_dict)
+
+
 
 def preprocess_data(track_df, audio_df):
     x = np.array([[[value]] for value in audio_df["y"].values])
     return x
 
 
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument("--csv", dest="csv", default="")
+parser.add_argument("--filename", dest="filename", nargs='+', default="")
+args = parser.parse_args()
+
 model_folder_path = "../model"
 data_folder_path = "../data"
-load_model_name = "success_model6.pt"
+load_model_name = "success_model4.pt"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -70,14 +99,18 @@ print("Loading Model...")
 model = torch.load(f"{model_folder_path}/{load_model_name}")
 model.eval()
 
-test_track_df, test_audio_df = read_files(f"{data_folder_path}/test.csv", f"{data_folder_path}/audios/clips")
-test_x = preprocess_data(test_track_df, test_audio_df)
 
 output_dict = {
     "track": [],
     "score": []
 }
 
+if(args.csv != ""):
+    test_track_df, test_audio_df = read_files(args.csv, f"{data_folder_path}/audios/clips")
+elif(args.filename != ""):
+    test_track_df, test_audio_df = read_files(args.filename)
+
+test_x = preprocess_data(test_track_df, test_audio_df)
 for track, features in zip(test_track_df['track'], test_x):
     features = np.array([features])
     features = torch.tensor(features, dtype=torch.float32).to(device)
@@ -86,4 +119,4 @@ for track, features in zip(test_track_df['track'], test_x):
     output_dict["score"].append(score[0][0].cpu().detach().numpy())
 
 output_df = pd.DataFrame(output_dict)
-output_df.to_csv(f"{data_folder_path}/submission.csv", index=False)
+output_df.to_csv(f"submission.csv", index=False)
