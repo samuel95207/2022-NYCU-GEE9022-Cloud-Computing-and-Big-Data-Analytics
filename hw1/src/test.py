@@ -25,20 +25,27 @@ class Model(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         x = F.relu(x)
+
         x = self.conv2(x)
         x = F.relu(x)
+
         x = self.pool(x)
         x = self.dropout1(x)
+
         x = torch.flatten(x, 1)
+
         x = self.fc1(x)
         x = F.relu(x)
         x = self.dropout2(x)
+
         x = self.fc2(x)
+
         output = self.sigmoid(x)
+
         return output
 
 
-def read_files(csv_path, audio_folder_path):
+def read_files_csv(csv_path, audio_folder_path):
     track_df = pd.read_csv(csv_path)
 
     audio_dict = {
@@ -56,7 +63,7 @@ def read_files(csv_path, audio_folder_path):
 
     return track_df, pd.DataFrame(audio_dict)
 
-def read_files(filename):
+def read_files_filename(filename):
     track_dict = {
         "track": filename,
     }
@@ -91,7 +98,7 @@ args = parser.parse_args()
 
 model_folder_path = "../model"
 data_folder_path = "../data"
-load_model_name = "success_model4.pt"
+load_model_name = "success_model6.pt"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -106,9 +113,9 @@ output_dict = {
 }
 
 if(args.csv != ""):
-    test_track_df, test_audio_df = read_files(args.csv, f"{data_folder_path}/audios/clips")
+    test_track_df, test_audio_df = read_files_csv(args.csv, f"{data_folder_path}/audios/clips")
 elif(args.filename != ""):
-    test_track_df, test_audio_df = read_files(args.filename)
+    test_track_df, test_audio_df = read_files_filename(args.filename)
 
 test_x = preprocess_data(test_track_df, test_audio_df)
 for track, features in zip(test_track_df['track'], test_x):
