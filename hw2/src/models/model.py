@@ -7,7 +7,7 @@ class ResNetModel(nn.Module):
         super(ResNetModel, self).__init__()
 
         self.model =  models.resnet18(pretrained=False, num_classes=out_dim)
-        # self.backbone_model =  models.resnet50(pretrained=False, num_classes=out_dim)
+        # self.model =  models.resnet50(pretrained=False, num_classes=out_dim)
 
         in_dim = self.model.fc.in_features
 
