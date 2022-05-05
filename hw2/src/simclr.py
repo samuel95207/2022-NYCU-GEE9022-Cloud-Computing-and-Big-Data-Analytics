@@ -116,7 +116,7 @@ class SimCLR(object):
             'state_dict': self.model.state_dict(),
             'optimizer': self.optimizer.state_dict(),
         }
-        filename = f'checkpoint_{self.time.strftime("%b%d_%H-%M-%S")}.pth.tar'
+        filename = f'checkpoint_{self.time.strftime("%b%d_%H-%M-%S")}_{batch_size}_{epochs}.pth.tar'
         torch.save(state, os.path.join(save_path, filename))
         print("Checkpoint Saved")
 
