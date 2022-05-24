@@ -1,0 +1,2 @@
+totalNum 	4138476.0
+totalSales 	1034457953.26
